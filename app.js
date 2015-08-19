@@ -1,66 +1,93 @@
 var Sequelize = require('sequelize');
+var sequelize = new Sequelize('TWDemo', 'root', 'root');
 
-var sequelize = new Sequelize('TWDemo', 'root', 'vermouth');
-
-var Student = sequelize.define('Student', {
-    name: Sequelize.STRING,
-    sex: {
-        type: Sequelize.ENUM('male', 'female')
-    }
+var Student = sequelize.define('student', {
+    student_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true
+    },
+    name: Sequelize.STRING
+}, {
+    freezeTableName: true,
+    timestamps: false
 });
 
-var Class = sequelize.define('Class', {
-    className: Sequelize.STRING
+var Record = sequelize.define('record', {
+    record_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true
+    },
+    record_name: Sequelize.STRING
+}, {
+    freezeTableName: true,
+    timestamps: false
 });
 
-var Course = sequelize.define('Course', {
-    CourseName: Sequelize.STRING
+var Course = sequelize.define('course', {
+    course_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true
+    },
+    course_name: Sequelize.STRING
+}, {
+    freezeTableName: true,
+    timestamps: false
 });
 
-var record = sequelize.define('record', {
-    recordId: Sequelize.INTEGER
-});
+// var Schedule = sequelize.define('schedule', {
+//     student_id: {
+//         type: Sequelize.INTEGER,
+//         primaryKey: true
+//     },
+//     course_id: {
+//         type: Sequelize.INTEGER,
+//         primaryKey: true
+//     },
+// }, {
+//     freezeTableName: true,
+//     timestamps: false
+// });
 
-
-Class.hasMany(Student, {
-    foreignkey: 'student_pk'
-});
-
-record.hasOne(Student, {
-    foreignKey: 'student_record'
+Record.hasOne(Student, {
+    foreignKey: 'record_id'
 });
 
 Student.belongsToMany(Course, {
-    through: 'student_has_course',
-    foreignkey: 'student_course_id'
+    through: 'Schedule',
+    foreignkey: 'student_id'
 });
 
 Course.belongsToMany(Student, {
-    through: 'student_has_course',
-    foreignkey: 'course_student_id'
+    through: 'Schedule',
+    foreignkey: 'course_id'
 });
 
-sequelize.sync().then(function() {
-    return Student.create({
-        name: 'John',
-        sex: 'male'
-    }).then(function(student) {
-        console.log(student.get('name'));
-        console.log(student.get('sex'));
-        return student;
-    }).then(function(student) {
-        Student.update({
-            sex: 'female'
-        }, {
-            where: {
-                id: 3
-            }
-        })
-    }).then(function() {
-        Student.destroy({
-            where: {
-                id: 5
-            }
-        })
-    })
+sequelize.sync({
+    force: true
+}).then(function() {
+    return Record.create({
+        record_id: 1,
+        name: 'sam'
+    });
+}).then(function () {
+    return Course.create({
+        course_id:1,
+        course_name: '音乐'
+    });
+}).then(function() {
+    return Course.update({
+        course_name: '美术'
+    }, {
+        where: {
+            course_id:1
+        }
+    });
+}).then(function() {
+    return Course.findAll({
+        where: {
+            course_id: 1
+        }
+    }).then(function(item) {
+        console.log(item[0].dataValues);
+    });
 });

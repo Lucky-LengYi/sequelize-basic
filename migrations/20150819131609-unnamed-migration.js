@@ -3,27 +3,52 @@
 module.exports = {
     up: function(migration, DataTypes) {
         migration.createTable(
-            'nameOfTheNewTable', {
-                id: {
+            'record', {
+                record_id: {
+                    type: DataTypes.INTEGER,
+                    primaryKey: true
+                },
+                student_id: {
+                    type: DataTypes.INTEGER,
+                    references: { model: "student", key: "student_id" }
+                },
+                record_name: DataTypes.STRING
+            });
+        migration.createTable(
+            'student', {
+                student_id: {
+                    type: DataTypes.INTEGER,
+                    primaryKey: true
+                },
+                name: DataTypes.STRING
+            });
+        migration.createTable(
+            'course', {
+                course_id: {
+                    type: DataTypes.INTEGER,
+                    primaryKey: true
+                },
+                course_name: DataTypes.STRING
+            });
+        migration.createTable(
+            'schedule', {
+                student_id: {
                     type: DataTypes.INTEGER,
                     primaryKey: true,
-                    autoIncrement: true
+                    references: { model: "student", key: "student_id" }
                 },
-                attr1: DataTypes.STRING,
-                attr2: DataTypes.INTEGER,
-                attr3: {
-                    type: DataTypes.BOOLEAN,
-                    defaultValue: false,
-                    allowNull: false
+                course_id: {
+                    type: DataTypes.INTEGER,
+                    primaryKey: true,
+                    references: { model: "course", key: "course_id" }
                 }
-            }, {
-                engine: 'MYISAM',
-                charset: 'latin1'
-            }
-        );
+            });
     },
 
     down: function(migration, DataTypes) {
-        migration.dropTable('demo')
+        migration.dropTable('schedule');
+        migration.dropTable('student');
+        migration.dropTable('course');
+        migration.dropTable('record');
     }
 };
